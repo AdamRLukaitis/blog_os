@@ -1,0 +1,63 @@
+{% extends "second-edition/base.html" %}
+
+{% import "macros.html" as macros %}
+
+{% block title %}{{ page.title }} | {{ config.title }}{% endblock title %}
+{% block header %}
+    <aside id="all-posts-link"><a href="{{ config.base_url | safe }}" title="All Posts">« All Posts</a></aside>
+{% endblock header %}
+
+{% block main %}
+    <h1>{{ page.title }}</h1>
+    <time datetime="{{ page.date | date(format="%Y-%m-%d") }}" class="post-date">
+        {{ page.date | date(format="%b %d, %Y") }}
+        {% if page.extra.updated %} (updated on {{ page.extra.updated | date(format="%b %d, %Y") }}) {% endif %}
+    </time>
+
+    <aside id="toc-aside">
+        <h2>Table of Contents</h2>
+        <ol>
+            {% for h2 in toc %}<li>
+                <a href="#{{h2.id | safe}}">{{ h2.title | safe }}</a>
+                {% if h2.children %}<ol>
+                    {% for h3 in h2.children %}<li>
+                        <a href="#{{h3.id | safe}}">{{ h3.title | safe }}</a>
+                    </li>{% endfor %}
+                </ol>{% endif %}
+            </li>{% endfor %}
+        </ol>
+    </aside>
+
+    {% if page.extra.warning %}
+        <div class="warning">
+            {% if page.extra.warning_short %} <b>{{ page.extra.warning_short }}</b> {% endif %}
+            {{ page.extra.warning | markdown(inline=true) | safe }}
+        </div>
+    {% endif %}
+
+    {{ page.content | replace(from="<!-- toc -->", to=macros::toc(toc=toc))  | safe }}
+
+    <div class="post-footer-support">
+        <h2>Support Me</h2>
+        {% include "support.html" %}
+    </div>
+{% endblock main %}
+
+{% block after_main %}
+    <hr>
+    <div class="PageNavigation">
+        {% if page.lighter %}
+            <a class="prev" href="/{{ page.lighter.path | safe }}">&laquo; {{ page.lighter.title }}</a>
+        {% endif %}
+        {% if page.heavier %}
+            <a class="next" href="/{{ page.heavier.path | safe }}">{{ page.heavier.title }} &raquo;</a>
+        {% endif %}
+    </div>
+
+    <hr>
+    <section>
+        <h2 id="comments">Comments</h2>
+        {{ macros::utterances() }}
+    </section>
+
+{% endblock after_main %}
